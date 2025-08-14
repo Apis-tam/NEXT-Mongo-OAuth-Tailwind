@@ -29,7 +29,7 @@ export default function HomePage() {
 
       <section className="mt-8 grid gap-4 md:grid-cols-2">
         <div className="card rounded-xl p-6">
-          <h2 className="text-xl font-semibold">Что внутри</h2>
+          <h2 className="text-xl font-semibold">What you can see inside</h2>
           <ul className="mt-2 list-disc space-y-1 pl-6 muted">
             <li>Next.js App Router</li>
             <li>TailwindCSS</li>

@@ -21,7 +21,7 @@ export default function NotesClient() {
     <div className="grid gap-6 md:grid-cols-[1fr]">
       <section className="card rounded-xl p-6">
         <h1 className="text-2xl font-semibold">My Noties</h1>
-        <p className="muted mt-1 text-sm">THis Data private</p>
+        <p className="muted mt-1 text-sm">This Data private</p>
 
         <form onSubmit={createNote} className="mt-4 grid gap-3">
           <input
