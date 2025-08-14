@@ -1,111 +1,137 @@
 # Next.js + MongoDB + Google OAuth - CRUD Notes
 
-Минималистичный full-stack шаблон: Next.js App Router, TailwindCSS, MongoDB через Mongoose, вход через Google (SSO на основе next-auth). Есть защищенные API маршруты и простой CRUD по заметкам, привязанный к пользователю.
+Minimalist full-stack template: Next.js App Router, TailwindCSS, MongoDB via Mongoose, Google login (SSO based on next-auth). Includes protected API routes and simple note CRUD tied to the user.
 
-## Стек
+## Stack
+
 - Next.js 14 - App Router
 - React 18
 - TailwindCSS 3
 - next-auth v4 - Google OAuth
 - MongoDB - Mongoose
 - TypeScript
-- Без точек с запятой и с отступом 2 пробела
+- No semicolons, 2-space indentation
 
-## Функционал
-- Регистрация и вход через Google
-- Защищенные API маршруты с проверкой сессии
-- CRUD по заметкам - каждая заметка привязана к пользователю
-- Минималистичный UI на TailwindCSS
+## Features
 
-## Быстрый старт
-1. Скопируй `.env.example` в `.env.local` и заполни значения:
-   - `NEXTAUTH_SECRET` - любая длинная случайная строка
-   - `NEXTAUTH_URL` - `http://localhost:3000` в локальной разработке
-   - `GOOGLE_CLIENT_ID` и `GOOGLE_CLIENT_SECRET` - из Google Cloud Console
-   - `MONGODB_URI` - строка подключения к MongoDB (например, Atlas)
+- Registration and login via Google
+- Protected API routes with session validation
+- Note CRUD - each note is tied to a user
+- Minimalist UI with TailwindCSS
 
-2. Установи зависимости и запусти dev сервер:
+## Quick Start
+
+1. Copy `.env.example` to `.env.local` and fill in the values:
+
+   - `NEXTAUTH_SECRET` - any long random string
+   - `NEXTAUTH_URL` - `http://localhost:3000` for local development
+   - `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` - from Google Cloud Console
+   - `MONGODB_URI` - MongoDB connection string (e.g., Atlas)
+
+2. Install dependencies and start the dev server:
+
    ```bash
    npm install
    npm run dev
    ```
 
-3. Открой `http://localhost:3000`
+3. Open `http://localhost:3000`
 
-### Настройка Google OAuth
-- Зайди в Google Cloud Console - APIs & Services - Credentials
-- Создай OAuth client: Application type - Web application
-- Добавь Authorized redirect URI: `http://localhost:3000/api/auth/callback/google`
-- Скопируй Client ID и Client Secret в `.env.local`
+### Google OAuth Setup
 
-### База данных
-- Подойдет любой кластер MongoDB Atlas
-- Пример строки подключения в `.env.example`
-- Коллекции для заметок создаются автоматически Mongoose при первом сохранении
+- Go to Google Cloud Console - APIs & Services - Credentials
+- Create an OAuth client: Application type - Web application
+- Add Authorized redirect URI: `http://localhost:3000/api/auth/callback/google`
+- Copy Client ID and Client Secret to `.env.local`
 
-## Архитектура и решения
-- Auth - next-auth с JWT стратегией. Адаптер БД не обязателен, поэтому для простоты не используется. Идентификатор пользователя берется из `token.sub`, который стабилен для аккаунта Google
-- Данные приложения - в MongoDB через Mongoose. Модель `Note` хранит `userId`, `title`, `content`, `timestamps`
-- API - обработчики в `app/api/notes` с проверкой сессии через `getServerSession`
-- UI - App Router страницы. `app/notes/page.tsx` защищена на сервере и рендерит клиентский компонент с формой и списком
+### Database
 
-### Опционально: хранить пользователей авторизации в MongoDB
-Если хочешь, чтобы next-auth писал пользователей и аккаунты в MongoDB, добавь адаптер:
-1. Установи пакет:
+- Any MongoDB Atlas cluster will work
+- Example connection string in `.env.example`
+- Note collections are automatically created by Mongoose on first save
+
+## Architecture and Decisions
+
+- Auth - next-auth with JWT strategy. No DB adapter is required, so it’s not used for simplicity. User identifier is taken from `token.sub`, which is stable for Google accounts
+- App data - stored in MongoDB via Mongoose. `Note` model stores `userId`, `title`, `content`, `timestamps`
+- API - handlers in `app/api/notes` with session validation via `getServerSession`
+- UI - App Router pages. `app/notes/page.tsx` is server-protected and renders a client component with a form and list
+
+### Optional: Store auth users in MongoDB
+
+If you want next-auth to store users and accounts in MongoDB, add an adapter:
+
+1. Install the package:
    ```bash
    npm i @next-auth/mongodb-adapter
    ```
-2. Создай `lib/mongodbClient.ts`:
+2. Create `lib/mongodbClient.ts`:
+
    ```ts
-   import { MongoClient } from 'mongodb'
+   // Content for mongodbClient.ts would go here
+   ```
 
-   const uri = process.env.MONGODB_URI || ''
-   if (!uri) throw new Error('MONGODB_URI is not set')
+   import { MongoClient } from 'mongodb';
 
-   let client: MongoClient
-   let clientPromise: Promise<MongoClient>
+   const uri = process.env.MONGODB_URI || '';
+   if (!uri) throw new Error('MONGODB_URI is not set');
+
+   let client: MongoClient;
+   let clientPromise: Promise<MongoClient>;
 
    declare global {
-     var _mongoClientPromise: Promise<MongoClient> | undefined
+   var \_mongoClientPromise: Promise<MongoClient> | undefined;
    }
 
    if (process.env.NODE_ENV === 'development') {
-     if (!global._mongoClientPromise) {
-       client = new MongoClient(uri)
-       global._mongoClientPromise = client.connect()
-     }
-     clientPromise = global._mongoClientPromise
+   if (!global.\_mongoClientPromise) {
+   client = new MongoClient(uri);
+   global.\_mongoClientPromise = client.connect();
+   }
+   clientPromise = global.\_mongoClientPromise;
    } else {
-     client = new MongoClient(uri)
-     clientPromise = client.connect()
+   client = new MongoClient(uri);
+   clientPromise = client.connect();
    }
 
-   export default clientPromise
+   export default clientPromise;
+
    ```
-3. В `lib/authOptions.ts` раскомментируй адаптер и импорт:
+
+   ```
+
+3. in `lib/authOptions.ts` i recomendet:
+
    ```ts
-   import { MongoDBAdapter } from '@next-auth/mongodb-adapter'
-   import clientPromise from '@/lib/mongodbClient'
+   import { MongoDBAdapter } from '@next-auth/mongodb-adapter';
+   import clientPromise from '@/lib/mongodbClient';
 
    export const authOptions: NextAuthOptions = {
      adapter: MongoDBAdapter(clientPromise),
-     providers: [/* ... */],
+     providers: [
+       /* ... */
+     ],
      session: { strategy: 'jwt' },
-     callbacks: { /* ... */ }
-   }
+     callbacks: {
+       /* ... */
+     }
+   };
    ```
 
-## Скрипты
-- `npm run dev` - локальный сервер разработки
-- `npm run build` - сборка
-- `npm start` - запуск собранного приложения
-- `npm run lint` - линтер
+## Script
 
-## Деплой
-- Vercel - самое простое. Добавь переменные окружения из `.env.local` в проект на Vercel
-- Убедись, что в консоли Google добавлен продовый redirect URI: `https://YOUR_DOMAIN/api/auth/callback/google`
+- `npm run dev` - local server
+- `npm run build` - create build for product
+- `npm start` - run build app
+- `npm run lint` - check eslint
 
-## Публикация в GitHub
+## Deploy
+
+Vercel - the simplest option. Add environment variables from .env.local to your Vercel project
+Ensure the production redirect URI is added in Google Cloud Console: https://YOUR_DOMAIN/api/auth/callback/google
+
+## Publishing to GitHub
+
 ```bash
 git init
 git add .
@@ -115,6 +141,7 @@ git remote add origin https://github.com/USERNAME/REPO.git
 git push -u origin main
 ```
 
-## Стиль кода
-- 2 пробела, без точек с запятой
-- Prettier и ESLint настроены соответствующим образом
+## Style code
+
+- 2 spaces, no semicolons
+- Prettier and ESLint configured accordingly
